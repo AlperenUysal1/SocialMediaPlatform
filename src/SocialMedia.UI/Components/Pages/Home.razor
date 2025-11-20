@@ -1,0 +1,242 @@
+﻿@page "/"
+@using SocialMedia.Application.DTOs
+@using SocialMedia.UI.Services
+@inject PostService PostService
+@rendermode InteractiveServer
+
+<PageTitle>Home | Social Media</PageTitle>
+
+<div class="container-fluid" style="background-color: #f0f2f5; min-height: 100vh;">
+    <div class="main-layout">
+        
+        <!-- LEFT SIDEBAR -->
+        <div class="sidebar d-none d-md-block">
+            <a href="/" class="nav-item active">
+                <i class="bi bi-house-door-fill"></i> Home
+            </a>
+            <div class="nav-item">
+                <i class="bi bi-person"></i> Profile
+            </div>
+            <div class="nav-item">
+                <i class="bi bi-people"></i> Friends
+            </div>
+            <div class="nav-item">
+                <i class="bi bi-bookmark"></i> Saved
+            </div>
+            <div class="nav-item">
+                <i class="bi bi-gear"></i> Settings
+            </div>
+        </div>
+
+        <!-- CENTER FEED -->
+        <div class="feed">
+            
+            <!-- Create Post Widget -->
+            <div class="create-post-card">
+                <div class="create-post-header">
+                    <img src="https://ui-avatars.com/api/?name=Me&background=random" class="user-avatar" alt="Me" />
+                    <textarea class="post-input" rows="2" @bind="newPostContent" placeholder="What's on your mind, Alp?"></textarea>
+                </div>
+                @if (!string.IsNullOrEmpty(newPostImageUrl))
+                {
+                    <div class="mb-2">
+                        <img src="@newPostImageUrl" style="max-height: 200px; border-radius: 8px;" />
+                    </div>
+                }
+                <div class="post-actions">
+                    <div>
+                        <input type="text" class="form-control form-control-sm" @bind="newPostImageUrl" placeholder="Image URL (http...)" style="width: 200px; display: inline-block;" />
+                    </div>
+                    <button class="btn btn-primary btn-sm px-4" @onclick="CreatePost" disabled="@string.IsNullOrWhiteSpace(newPostContent)">
+                        Post
+                    </button>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    <div class="alert alert-danger mt-2 py-1 px-2 small">@errorMessage</div>
+                }
+            </div>
+
+            <!-- Posts Stream -->
+            @if (posts == null)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            }
+            else if (!posts.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-newspaper display-4"></i>
+                    <p class="mt-2">No posts yet. Be the first to share something!</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var post in posts)
+                {
+                    <div class="post-card">
+                        <!-- Header -->
+                        <div class="post-header">
+                            <img src="@GetAvatarUrl(post.UserId.ToString())" class="user-avatar" alt="User" />
+                            <div>
+                                <div class="post-user-name">User @post.UserId.ToString().Substring(0, 8)</div>
+                                <div class="post-time">@GetTimeAgo(post.CreatedOn) <i class="bi bi-globe-americas ms-1"></i></div>
+                            </div>
+                            <div class="ms-auto">
+                                <i class="bi bi-three-dots text-muted" style="cursor: pointer;"></i>
+                            </div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="post-content">
+                            @post.Content
+                        </div>
+
+                        <!-- Image -->
+                        @if (!string.IsNullOrEmpty(post.ImageUrl))
+                        {
+                            <img src="@post.ImageUrl" class="post-image" alt="Post Content" />
+                        }
+
+                        <!-- Stats (Likes/Comments count) -->
+                        <div class="post-stats">
+                            <div>
+                                <i class="bi bi-hand-thumbs-up-fill text-primary"></i> 
+                                <span class="ms-1">@GetRandomCount(post.Id)</span>
+                            </div>
+                            <div>
+                                <span>@GetRandomCount(post.UserId) comments</span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="post-footer">
+                            <button class="action-btn">
+                                <i class="bi bi-hand-thumbs-up"></i> Like
+                            </button>
+                            <button class="action-btn">
+                                <i class="bi bi-chat-square"></i> Comment
+                            </button>
+                            <button class="action-btn">
+                                <i class="bi bi-share"></i> Share
+                            </button>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <div class="right-sidebar">
+            <div class="trend-card">
+                <h6 class="fw-bold text-secondary mb-3">Sponsored</h6>
+                <div class="d-flex gap-2 mb-3 align-items-center">
+                    <div style="width: 100px; height: 100px; background: #ddd; border-radius: 8px;"></div>
+                    <div>
+                        <strong>Amazing Product</strong>
+                        <div class="text-muted small">bestproduct.com</div>
+                    </div>
+                </div>
+                <hr />
+                <h6 class="fw-bold text-secondary mb-3">Trending for you</h6>
+                <div class="mb-2">
+                    <div class="small text-muted">Technology · Trending</div>
+                    <strong>#DotNet10</strong>
+                    <div class="small text-muted">50K posts</div>
+                </div>
+                <div class="mb-2">
+                    <div class="small text-muted">Coding · Trending</div>
+                    <strong>#BlazorIsAwesome</strong>
+                    <div class="small text-muted">12K posts</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    private List<PostDto>? posts;
+    private string newPostContent = "";
+    private string newPostImageUrl = "";
+    private string errorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPosts();
+    }
+
+    private async Task LoadPosts()
+    {
+        try
+        {
+            posts = await PostService.GetPostsAsync();
+            if (posts != null)
+            {
+                posts = posts.OrderByDescending(p => p.CreatedOn).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading posts: {ex.Message}";
+            Console.WriteLine(errorMessage);
+        }
+    }
+
+    private async Task CreatePost()
+    {
+        errorMessage = "";
+        
+        if (string.IsNullOrWhiteSpace(newPostContent))
+        {
+            errorMessage = "Please enter some content";
+            return;
+        }
+
+        try
+        {
+            var newPost = new CreatePostDto
+            {
+                Content = newPostContent,
+                ImageUrl = string.IsNullOrWhiteSpace(newPostImageUrl) ? null : newPostImageUrl,
+                UserId = Guid.NewGuid()
+            };
+
+            await PostService.CreatePostAsync(newPost);
+            
+            newPostContent = "";
+            newPostImageUrl = "";
+            
+            await LoadPosts();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error creating post: {ex.Message}";
+        }
+    }
+
+    // Helper to get random avatar based on user ID
+    private string GetAvatarUrl(string seed)
+    {
+        return $"https://ui-avatars.com/api/?name={seed}&background=random&color=fff";
+    }
+
+    // Helper to simulate "Time Ago"
+    private string GetTimeAgo(DateTime date)
+    {
+        var span = DateTime.UtcNow - date;
+        if (span.TotalMinutes < 1) return "Just now";
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes}m";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours}h";
+        return $"{(int)span.TotalDays}d";
+    }
+
+    // Fake stats for visuals
+    private int GetRandomCount(Guid seed)
+    {
+        return Math.Abs(seed.GetHashCode()) % 50;
+    }
+}
