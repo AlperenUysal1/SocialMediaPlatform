@@ -1,0 +1,22 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userprefs
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+api_log.txt
+api_error.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
