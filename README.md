@@ -1,4 +1,4 @@
-# Social Media Platform
+# Social Media Platform ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) ![.NET](https://img.shields.io/badge/.NET-8.0-purple)
 
 A modern, full-stack social media application built with **.NET 8**, **Blazor Server**, and **Clean Architecture**.
 
