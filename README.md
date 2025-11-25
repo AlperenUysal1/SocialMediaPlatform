@@ -2,7 +2,7 @@
 
 A modern, full-stack social media application built with **.NET 8**, **Blazor Server**, and **Clean Architecture**.
 
-## 🚀 Tech Stack
+##Tech Stack
 
 - **Backend:** ASP.NET Core Web API (.NET 8)
 - **Frontend:** Blazor Web App (Interactive Server Mode)
@@ -10,7 +10,7 @@ A modern, full-stack social media application built with **.NET 8**, **Blazor Se
 - **Architecture:** Clean Architecture (Domain, Application, Infrastructure, API, UI)
 - **Styling:** Custom CSS (Facebook-inspired design) + Bootstrap 5
 
-## ✨ Features
+##Features
 
 - **Create Post:** Share your thoughts with text and images.
 - **News Feed:** View posts from users in a modern card layout.
@@ -20,7 +20,7 @@ A modern, full-stack social media application built with **.NET 8**, **Blazor Se
   - Randomly generated user avatars (using UI Avatars API)
 - **Real-time-ready:** Built on Blazor Server for seamless interactions.
 
-## 🛠️ Getting Started
+## Getting Started
 
 1. **Clone the repository**
 2. **Run the Backend API:**
@@ -37,7 +37,7 @@ A modern, full-stack social media application built with **.NET 8**, **Blazor Se
    - UI: `http://localhost:5251`
    - API Swagger: `http://localhost:5241/swagger`
 
-## 🏗️ Project Structure
+## Project Structure
 
 - `SocialMedia.Domain`: Entities and core logic.
 - `SocialMedia.Application`: Interfaces, DTOs, and business rules.
